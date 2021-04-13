@@ -26,17 +26,17 @@
 
   </style>
   <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=Zyq6TjFQ1679hxUWSUhud4i03GThAEGI"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
 </head>
 <body>
-  <div id="allmap">
-    <div style="position: relative">
-      <input style="width: 200px;height: 100px;padding-right: 10px;padding-top: 50px;" type="button" value="青花瓷">
-      <input style="width: 200px;height: 100px;padding-right: 10px;padding-top: 50px;" type="button" value="奶奶灰">
-    </div>
+  <div style="width: 200px;height: 100px;position: absolute;margin-top: 930px;margin-left:5px;z-index: 100;">
+    <input style="width: 80px;height: 30px;padding-left: 10px; background-color: royalblue;color: antiquewhite;" type="button" value="青花瓷" onclick="setMapStyleFromId()">
+    <input style="width: 80px;height: 30px;padding-left: 10px; background-color: #397d4e; color: antiquewhite;" type="button" value="葱油绿" onclick="setMapStyleFromJson()">
   </div>
+  <div id="allmap">
 
-
+  </div>
 </body>
 </html>
 <script type="text/javascript">
@@ -94,9 +94,12 @@
    * 使用样式Json文件设置地图样式
    */
   function setMapStyleFromJson(){
+
+    $.getJSON('/bdMap/data/custom_map_config.json',function (json){
       map.setMapStyleV2({
-        styleJson:'/data/custom_map_config.json'
-      })
+        styleJson:json
+      });
+    });
   }
 
 </script>

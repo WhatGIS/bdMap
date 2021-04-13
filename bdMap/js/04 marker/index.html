@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no" />
+
+  <title>地图标注</title>
+  <style type="text/css">
+    body {width:100%;height: 100%; overflow:hidden;margin: 0px;padding: 0px;font-family: "微软雅黑 Light";}
+    html{height: 100%}
+    #allmap {height: 100%}
+  </style>
+
+  <!--  去除“百度地图”左下角字样  -->
+  <style type="text/css">
+
+    /*版权字样*/
+    .BMap_cpyCtrl {
+      display: none;
+    }
+
+    /*百度字样*/
+    .anchorBL {
+      display: none;
+    }
+
+  </style>
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=Zyq6TjFQ1679hxUWSUhud4i03GThAEGI"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <!--  <script type="text/javascript" src="/bdMap/js/04%20marker/SquareOverlay.js"></script>-->
+  <!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
+</head>
+<body>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 930px;margin-left:5px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: royalblue;color: antiquewhite; border-radius: 2px;" type="button" value="青花瓷" onclick="setMapStyleFromId()">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color:  #397d4e;color: antiquewhite;" type="button" value="葱油绿" onclick="setMapStyleFromJson()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 930px;margin-left:175px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue;color: antiquewhite;" type="button" value="添加标注" onclick="addMapMarker()">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue;color: antiquewhite;" type="button" value="删除标注" onclick="removeMapMarker()">
+</div>
+
+
+<div id="allmap">
+
+</div>
+</body>
+</html>
+<script type="text/javascript">
+
+  var map = null;
+  var point = new BMap.Point(117.2972, 31.8988);
+
+  setMap();
+
+  function setMap(){
+    initialMap();
+    addMapControls();
+    setMapStyleFromJson();
+    //addMapMarker();
+  }
+  /**
+   * 初始化地图
+   **/
+  function initialMap() {
+    map = new BMap.Map("allmap", {
+      coordsType: 5,//coordsType 指定输入输出的坐标类型，3 为  gcj02坐标，5为bd011坐标，默认为5，
+                    //指定完成后，API将以指定的坐标类型处理您传入的坐标
+      enableBizAuthLogo: false
+    });
+
+    map.centerAndZoom(point, 15);// 初始化地图，中心点和缩放级别
+    map.enableScrollWheelZoom(true);
+  }
+
+  /**
+   *  添加地图导航控件
+   **/
+  function addMapControls() {
+    map.addControl(new BMap.NavigationControl());
+    //添加地图比例尺控件
+
+    /**
+     * 比例尺工具与版本标识工具所用同一个class，anchorBL, 所以，当采用CSS方式 display:none 去掉左下角
+     * 的百度标识和版权标识时，缩放比例工具也会被隐藏。
+     **/
+    var opts = {offset: new BMap.Size(150, 5)}
+    map.addControl(new BMap.ScaleControl(opts));
+
+    map.addControl(new BMap.OverviewMapControl());
+
+    /**
+     * 此种方法添加为三种类型，地图/卫星/三维，其中切换至三维时无法显示地图，也无官方文档所说的切换城市
+     * 不建议采用此种方法
+     */
+    // map.addControl(new BMap.MapTypeControl());
+    // map.setCurrentCity("合肥");
+
+    //添加地图控件, 矢量图和卫星图。 矢量图为卫星地图+矢量标注
+    map.addControl(new BMap.MapTypeControl({
+      mapTypes: [
+        BMAP_NORMAL_MAP, //矢量图
+        //BMAP_SATELLITE_MAP,  //卫星图， 此选项不起作用
+        BMAP_HYBRID_MAP //混合图， 卫星+矢量图中的街道和标注
+      ]
+    }));
+  }
+
+  /**
+   * 使用样式ID设置地图样式
+   */
+  function setMapStyleFromId(){
+    map.setMapStyleV2({
+      styleId:'f1d776a2b7da27c7455843c309a9fac3'
+    });
+  }
+
+  /**
+   * 使用样式Json文件设置地图样式
+   */
+  function setMapStyleFromJson() {
+
+    $.getJSON('/bdMap/data/custom_map_config.json', function (json) {
+      map.setMapStyleV2({
+        styleJson: json
+      });
+    });
+  }
+
+  function addMapMarker(){
+    addMarkerPoint();
+    addMarkerPolyline();
+    addMarkerIcon();
+    addMarkerPolygon();
+  }
+
+  function removeMapMarker(){
+    map.clearOverlays();
+  }
+
+  /**
+   * 添加点标注
+   **/
+  function addMarkerPoint() {
+
+    var marker = new BMap.Marker(point);
+    map.addOverlay(marker);
+    marker.addEventListener("click", function () {
+      alert("您点击了标注！");
+    });
+    marker.enableDragging();
+    marker.addEventListener("dragend", function(e){
+      alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+    });
+
+  }
+
+  /**
+   *添加线标注
+   **/
+  function addMarkerPolyline(){
+    var polyline = new BMap.Polyline([
+        new BMap.Point(117.2972,31.8988),
+        new BMap.Point(117.2872,31.9088)
+      ],
+      {
+        strokeColor:"blue",
+        strokeWeight:6,
+        strokeOpacity:0.5
+      });
+
+    map.addOverlay(polyline);
+    polyline.addEventListener("click",function () {
+      alert("你点了个这条线!");
+    })
+  }
+
+  function addMarkerIcon(){
+    var myIcon = new BMap.Icon("/bdMap/img/1.gif",new BMap.Size(36,36));
+    var pt =new BMap.Point(117.3172,31.9188);
+    var marker = new BMap.Marker(pt,{
+      icon: myIcon
+    });
+    marker.enableDragging();
+    map.addOverlay(marker);
+
+    var opts = {
+      position: pt,
+      offset: new BMap.Size(10,10)
+    }
+    var label = new BMap.Label("这是一个测试用的站点",opts);
+
+    marker.addEventListener("onclick", function(e) {
+      alert("你点了一个站点。");
+    });
+
+    marker.addEventListener("onmouseout", function(e) {
+      map.removeOverlay(label);
+    });
+    marker.addEventListener("onmouseover", function(e) {
+      console.log("泵房站点: " + e.point.lng + " , " + e.point.lat + " ; " + e.pixel.x + " , " + e.pixel.y + " | ");
+      map.addOverlay(label);
+    });
+  }
+  }
+
+  /**
+   * 添加自定义标注
+   */
+  function addMarkerPolygon(){
+
+    var circle = new BMap.Circle(point,500,{
+      strokeColor:"green",
+      strokeWeight:2,
+      strokeOpacity:0.7
+    });
+    circle.addEventListener("click",function () {
+      alert("你点了个圆○！");
+    })
+    map.addOverlay(circle);
+
+
+    var pEnd = new BMap.Point(117.3172,31.9188);
+    var rectangle = new BMap.Polygon([
+      new BMap.Point(point.lng,point.lat),
+      new BMap.Point(pEnd.lng,point.lat),
+      new BMap.Point(pEnd.lng,pEnd.lat),
+      new BMap.Point(point.lng,pEnd.lat)
+    ],{
+      strokeColor:'yellow',
+      strokeWeight:2,
+      strokeOpacity:0.5
+    });
+    rectangle.addEventListener("click",function () {
+      alert("你点了个长方形。");
+    })
+    map.addOverlay(rectangle);
+
+    var polygon = new BMap.Polygon([
+      new BMap.Point(117.2972,31.8988),
+      new BMap.Point(117.2625,31.8635),
+      new BMap.Point(117.3223,31.8534),
+      new BMap.Point(117.3568,31.85863),
+      new BMap.Point(117.3465,31.88641)
+    ],{
+      strokeColor:"red",
+      strokeWeight: 3,
+      strokeOpacity: 0.6
+    });
+    polygon.addEventListener("click",function (){
+      alert("你点了个多边形。")
+    })
+    map.addOverlay(polygon);
+  }
+
+</script>
