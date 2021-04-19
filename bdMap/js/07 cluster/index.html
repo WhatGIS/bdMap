@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="initial-scale=1.0,user-scalable=no" />
 
-  <title>地图富标注</title>
+  <title>地图聚合</title>
   <style type="text/css">
     body {width:100%;height: 100%; overflow:hidden;margin: 0px;padding: 0px;font-family: "微软雅黑 Light";}
     html{height: 100%}
@@ -23,12 +23,28 @@
     .anchorBL {
       display: none;
     }
-
+  </style>
+  <style type="text/css">
+    .infoBoxContent{font-size:12px;}
+    .infoBoxContent .title{background:url(/bdMap/img/title.jpg) no-repeat;height:42px;width:272px;}
+    .infoBoxContent .title strong{font-size:14px;line-height:42px;padding:0 10px 0 5px;}
+    .infoBoxContent .title .price{color:#FFFF00;}
+    .infoBoxContent .list{width:268px;border:solid 1px #4FA5FC;border-top:none;background:#fff;height:260px;}
+    .infoBoxContent .list ul{margin:0;padding:5px;list-style:none;}
+    .infoBoxContent .list ul li {float:left;width:255px;border-bottom:solid 1px #4FA5FC;padding:2px 0;}
+    .infoBoxContent .list ul .last{border:none;}
+    .infoBoxContent .list ul img{width:53px;height:42px;margin-right:5px;}
+    .infoBoxContent .list ul p{padding:0;margin:0;}
+    .infoBoxContent .left{float:left;}
+    .infoBoxContent .rmb{float:right;color:#EB6100;font-size:14px;font-weight:bold;}
+    .infoBoxContent a{color:#0041D9;text-decoration:none;}
   </style>
   <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=Zyq6TjFQ1679hxUWSUhud4i03GThAEGI"></script>
   <script type="text/javascript" src="http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/MarkerClusterer/1.2/src/MarkerClusterer_min.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script>
   <script type="text/javascript" src="/bdMap/js/BMapLib/RichMarker_min.js"></script>
+  <script type="text/javascript" src="/bdMap/js/BMapLib/InfoBox_min.js"></script>
 <!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
 </head>
 <body>
@@ -46,6 +62,11 @@
 <div style="width: 200px;height: 100px;position: absolute;margin-top: 930px;margin-left:345px;z-index: 101;">
   <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="添加富标注" onclick="addRichMarker()">
   <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="删除富标注" onclick="removeRichMarker()">
+</div>
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 930px;margin-left:520px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="设置点聚合" onclick="setCluster()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="改变样式" onclick="changStyles()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="删除点聚合" onclick="withoutCluster()">
 </div>
 
   <div id="allmap"> </div>
@@ -152,8 +173,25 @@
 
     var marker = new BMap.Marker(point);
     map.addOverlay(marker);
+
     marker.addEventListener("click", function () {
-      alert("您点击了标注！");
+
+      var htmlContent = ["<div class='infoBoxContent'><div class='title'><strong>中海雅园</strong><span class='price'>均价43000，overlay-下面的链接无法打开，而infobox可以</span></div>",
+        "<div class='list'><ul><li><div class='left'><img src='/bdMap/img/house3.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园南北通透四居室</a><p>4室2厅，205.00平米，3层</p></div><div class='rmb'>760万</div></li>"
+        ,"<li><div class='left'><img src='/bdMap/img/house1.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园四居室还带保姆间</a><p>2室1厅，112.00平米，16层</p></div><div class='rmb'>300万</div></li>"
+        ,"<li><div class='left'><img src='/bdMap/img/house2.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>《有钥匙 随时看》花园水系</a><p>3室2厅，241.00平米，16层</p></div><div class='rmb'>400万</div></li>"
+        ,"<li><div class='left'><img src='/bdMap/img/house3.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>富力城D区正规楼王大三居</a><p>3室3厅，241.00平米，17层</p></div><div class='rmb'>600万</div></li>"
+        ,"<li class='last'><div class='left'><img src='/bdMap/img/house1.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>富力城豪，身份人士的象征</a><p>4室2厅，213.90平米，25层</p></div><div class='rmb'>700万</div></li>"
+        ,"</ul></div>"
+        ,"</div>"];
+
+      var richContent = new BMapLib.RichMarker(htmlContent.join(""),point,{
+
+        "anchor": new BMap.Size(-72,-86),
+        "enableDragging":true
+      });
+      map.addOverlay(richContent);
+
     });
     marker.enableDragging();
     marker.addEventListener("dragend", function(e){
@@ -161,15 +199,14 @@
     });
   }
 
-
   /**
    *添加线标注
    **/
   function addMarkerPolyline(){
     var polyline = new BMap.Polyline([
-        new BMap.Point(117.2972,31.8988),
-        new BMap.Point(117.2872,31.9088)
-      ],
+      new BMap.Point(117.2972,31.8988),
+      new BMap.Point(117.2872,31.9088)
+    ],
       {
         strokeColor:"blue",
         strokeWeight:6,
@@ -185,7 +222,6 @@
       addSimpleInfo(center,"你点了这条线。")
     })
   }
-
 
   /**
    * 添加自定义标注
@@ -245,7 +281,6 @@
     map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.3465,31.88641), 99));
   }
 
-
   /**
    * 添加自定义图标标注
    **/
@@ -264,10 +299,6 @@
     }
     var label = new BMap.Label("这是一个测试用的站点",opts);
 
-    marker.addEventListener("onclick", function(e) {
-      alert("你点了一个站点。");
-    });
-
     marker.addEventListener("onmouseout", function(e) {
       map.removeOverlay(label);
     });
@@ -275,17 +306,26 @@
       console.log("泵房站点: " + e.point.lng + " , " + e.point.lat + " ; " + e.pixel.x + " , " + e.pixel.y + " | ");
       map.addOverlay(label);
     });
+
+    addMarkerInfo(marker);
   }
+
 
   var myRM;
   var myRichMarker1;
   var myRichMarker2;
 
+  /**
+   * 添加富标注
+   */
   function addRichMarker(){
 
     addNormalRich();
     addBestRich();
 
+    /**
+     * 添加图片富标注
+     **/
     function addNormalRich(){
 
       var htmlContent = "<div style='background:#E7F0F5;color:#0082CB;border:1px solid #333;width:300px;'>"
@@ -343,6 +383,9 @@
       });
     }
 
+    /**
+     * 添加复杂富标注
+     **/
     function addBestRich(){
 
       var htm1 = "<div id='overLay' style='width:93px;height:116px;background:url(/bdMap/img/back.png) left top no-repeat; position: absolute;'>"
@@ -379,6 +422,9 @@
     }
   }
 
+  /**
+   * 删除富标注
+   */
   function removeRichMarker(){
     if(myRm)
     map.removeOverlay(myRm);
@@ -390,7 +436,8 @@
     if(myRichMarker2){
       map.removeOverlay(myRichMarker2);
     }
-  }
+  };
+
 
   /**
    * 添加简单信息框
@@ -407,6 +454,121 @@
     // marker.addEventListener("onclick",function (e) {
     //   infoWindow.open(marker);
     // });
+  }
+
+  /**
+   * 添加复杂信息框，使用InfoBox时，html中的链接可以打开，而使用Overlay时，链接不可以。
+   * 应该Overlay虽然有链接，但应该整个作为一个marker来处理，不能对其内部进行操作。
+   * @param marker
+   */
+  function addMarkerInfo(marker){
+
+    var html = ["<div class='infoBoxContent'><div class='title'><strong>中海雅园</strong><span class='price'>均价43000</span></div>",
+      "<div class='list'><ul><li><div class='left'><img src='/bdMap/img/house3.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园南北通透四居室</a><p>4室2厅，205.00平米，3层</p></div><div class='rmb'>760万</div></li>"
+      ,"<li><div class='left'><img src='/bdMap/img/house1.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园四居室还带保姆间</a><p>2室1厅，112.00平米，16层</p></div><div class='rmb'>300万</div></li>"
+      ,"<li><div class='left'><img src='/bdMap/img/house2.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>《有钥匙 随时看》花园水系</a><p>3室2厅，241.00平米，16层</p></div><div class='rmb'>400万</div></li>"
+      ,"<li><div class='left'><img src='/bdMap/img/house3.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>富力城D区正规楼王大三居</a><p>3室3厅，241.00平米，17层</p></div><div class='rmb'>600万</div></li>"
+      ,"<li class='last'><div class='left'><img src='/bdMap/img/house1.jpg'/></div><div class='left'><a target='_blank' href='http://map.baidu.com'>富力城豪，身份人士的象征</a><p>4室2厅，213.90平米，25层</p></div><div class='rmb'>700万</div></li>"
+      ,"</ul></div>"
+      ,"</div>"];
+
+    var infoBox = new BMapLib.InfoBox(map,html.join(""),{
+      boxStyle:{
+        background:"url('/bdMap/img/tipbox.gif') no-repeat center top"
+        ,width: "270px"
+        ,height: "300px"
+      }
+      ,offset: new BMap.Size(10,20)
+      ,closeIconUrl:"/bdMap/img/close.png"
+      ,closeIconMargin: "1px 1px 0 0"
+      ,enableAutoPan: true
+      ,align: INFOBOX_AT_TOP
+    });
+
+    marker.addEventListener("onclick", function(e) {
+      infoBox.open(marker);
+    });
+  }
+
+  var markerCluster = null;
+
+  var i =1;
+
+  var defaultStyles;
+
+  var myStyles = [{
+    url: '/bdMap/img/cluster/m1.png',
+    size: new BMap.Size(53, 52),
+    //opt_anchor: [16, 0],
+    textColor: '#f5f1f6',
+    opt_textSize: 10
+  }, {
+    url: '/bdMap/img/cluster/m2.png',
+    size: new BMap.Size(56, 55),
+    //opt_anchor: [40, 35],
+    textColor: '#ebecf1',
+    opt_textSize: 12
+  }, {
+    url: '/bdMap/img/cluster/m3.png',
+    size: new BMap.Size(78, 77),
+    //opt_anchor: [32, 0],
+    textColor: '#e5e6ec',
+    opt_textSize: 14
+  }];
+
+  /**
+   * 点的聚合
+   */
+  function setCluster(){
+
+    var MAX = 100 * 1;
+    var markers = [];
+    var pt = null;
+    var i=0;
+    for(;i < MAX; i++){
+      pt = new BMap.Point(Math.random() * 40 + 85, Math.random() * 30 + 21);
+      markers.push(new BMap.Marker(pt));
+    }
+
+    if(markerCluster){
+      markerCluster.addMarkers(markers);
+    } else {
+      markerCluster = new BMapLib.MarkerClusterer(map,{markers:markers}); //请记住是 MarkerClusterer
+    }
+
+    if(!defaultStyles)
+    {
+      defaultStyles = markerCluster.getStyles();
+    }
+  }
+
+  var styleType =0;
+  function changStyles(){
+    if(styleType == 0){
+      markerCluster.setStyles(myStyles);
+      styleType = 1;
+    } else if(styleType == 1){
+      markerCluster.setStyles(defaultStyles);
+      styleType = 0;
+    }
+  }
+
+  /**
+   * 取消点聚合
+   */
+  function withoutCluster(){
+
+    if(markerCluster)
+      markerCluster.clearMarkers();
+
+    var MAX = 100;
+    var pt = null;
+    var i=0;
+    for(;i < MAX; i++){
+      pt = new BMap.Point(Math.random() * 40 + 85, Math.random() * 30 + 21);
+      var marker = new BMap.Marker(pt);
+      map.addOverlay(marker);
+    }
   }
 
 

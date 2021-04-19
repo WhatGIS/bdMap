@@ -157,6 +157,7 @@
 
   }
 
+
   /**
    *添加线标注
    **/
@@ -170,12 +171,76 @@
         strokeWeight:6,
         strokeOpacity:0.5
       });
-
     map.addOverlay(polyline);
+
     polyline.addEventListener("click",function () {
-      alert("你点了个这条线!");
+      var linePaths = polyline.getPath();
+      var centerx = (linePaths[0].lng + linePaths[linePaths.length -1].lng)/2;
+      var centery = (linePaths[0].lat + linePaths[linePaths.length -1].lat)/2;
+      var center = new BMap.Point(centerx,centery)
+      addSimpleInfo(center,"你点了这条线。")
     })
   }
+
+
+  /**
+   * 添加自定义标注
+   */
+  function addMarkerPolygon(){
+
+    var circle = new BMap.Circle(point,500,{
+      strokeColor:"green",
+      strokeWeight:2,
+      strokeOpacity:0.7
+    });
+
+    circle.addEventListener("click",function () {
+      var center = circle.getBounds().getCenter();
+      addSimpleInfo(center,"你点了这个圆。");
+    });
+    map.addOverlay(circle);
+
+    var pEnd = new BMap.Point(117.3172,31.9188);
+    var rectangle = new BMap.Polygon([
+      new BMap.Point(point.lng,point.lat),
+      new BMap.Point(pEnd.lng,point.lat),
+      new BMap.Point(pEnd.lng,pEnd.lat),
+      new BMap.Point(point.lng,pEnd.lat)
+    ],{
+      strokeColor:'yellow',
+      strokeWeight:2,
+      strokeOpacity:0.5
+    });
+    rectangle.addEventListener("click",function () {
+      var center = rectangle.getBounds().getCenter();
+      addSimpleInfo(center,"你点了这个长方形。");
+    });
+    map.addOverlay(rectangle);
+
+    var polygon = new BMap.Polygon([
+      new BMap.Point(117.2972,31.8988),
+      new BMap.Point(117.2625,31.8635),
+      new BMap.Point(117.3223,31.8534),
+      new BMap.Point(117.3568,31.85863),
+      new BMap.Point(117.3465,31.88641)
+    ],{
+      strokeColor:"red",
+      strokeWeight: 3,
+      strokeOpacity: 0.6
+    });
+    polygon.addEventListener("click",function (){
+      var center = polygon.getBounds().getCenter();
+      addSimpleInfo(center,"你点了个多边形。")
+    })
+    map.addOverlay(polygon);
+
+    map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.2972,31.8988), 7));
+    map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.2625,31.8635), 15));
+    map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.3223,31.8534), 24));
+    map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.3568,31.85863), 48));
+    map.addOverlay(new BMapLib.TextIconOverlay(new BMap.Point(117.3465,31.88641), 99));
+  }
+
 
   function addMarkerIcon(){
     var myIcon = new BMap.Icon("/bdMap/img/1.gif",new BMap.Size(36,36));
@@ -204,55 +269,22 @@
       map.addOverlay(label);
     });
   }
-  }
 
   /**
-   * 添加自定义标注
+   * 添加简单信息框
    */
-  function addMarkerPolygon(){
-
-    var circle = new BMap.Circle(point,500,{
-      strokeColor:"green",
-      strokeWeight:2,
-      strokeOpacity:0.7
-    });
-    circle.addEventListener("click",function () {
-      alert("你点了个圆○！");
-    })
-    map.addOverlay(circle);
-
-
-    var pEnd = new BMap.Point(117.3172,31.9188);
-    var rectangle = new BMap.Polygon([
-      new BMap.Point(point.lng,point.lat),
-      new BMap.Point(pEnd.lng,point.lat),
-      new BMap.Point(pEnd.lng,pEnd.lat),
-      new BMap.Point(point.lng,pEnd.lat)
-    ],{
-      strokeColor:'yellow',
-      strokeWeight:2,
-      strokeOpacity:0.5
-    });
-    rectangle.addEventListener("click",function () {
-      alert("你点了个长方形。");
-    })
-    map.addOverlay(rectangle);
-
-    var polygon = new BMap.Polygon([
-      new BMap.Point(117.2972,31.8988),
-      new BMap.Point(117.2625,31.8635),
-      new BMap.Point(117.3223,31.8534),
-      new BMap.Point(117.3568,31.85863),
-      new BMap.Point(117.3465,31.88641)
-    ],{
-      strokeColor:"red",
-      strokeWeight: 3,
-      strokeOpacity: 0.6
-    });
-    polygon.addEventListener("click",function (){
-      alert("你点了个多边形。")
-    })
-    map.addOverlay(polygon);
+  function addSimpleInfo(point,content){
+    var opts = {
+      width:250,
+      height:100,
+      title:"<div class='title' style='color: #4FA5FC'><strong>信息窗口</strong></div>"
+    };
+    var infoWindow = new BMap.InfoWindow(content,opts);
+    map.openInfoWindow(infoWindow,point);
+    //
+    // marker.addEventListener("onclick",function (e) {
+    //   infoWindow.open(marker);
+    // });
   }
 
 </script>
