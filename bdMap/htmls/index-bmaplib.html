@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no" />
+
+  <title>路线规划</title>
+  <style type="text/css">
+    body {width:100%;height: 100%; overflow:hidden;margin: 0px;padding: 0px;font-family: "微软雅黑 Light";}
+    html{height: 100%}
+    #allmap {height: 100%}
+  </style>
+
+  <!--  去除“百度地图”左下角字样  -->
+  <style type="text/css">
+
+    /*版权字样*/
+    .BMap_cpyCtrl {
+      display: none;
+    }
+
+    /*百度字样*/
+    .anchorBL {
+      display: none;
+    }
+
+
+  </style>
+  <style type="text/css">
+    .infoBoxContent{font-size:12px;}
+    .infoBoxContent .title{background:url(/bdMap/img/title.jpg) no-repeat;height:42px;width:272px;}
+    .infoBoxContent .title strong{font-size:14px;line-height:42px;padding:0 10px 0 5px;}
+    .infoBoxContent .title .price{color:#FFFF00;}
+    .infoBoxContent .list{width:268px;border:solid 1px #4FA5FC;border-top:none;background:#fff;height:260px;}
+    .infoBoxContent .list ul{margin:0;padding:5px;list-style:none;}
+    .infoBoxContent .list ul li {float:left;width:255px;border-bottom:solid 1px #4FA5FC;padding:2px 0;}
+    .infoBoxContent .list ul .last{border:none;}
+    .infoBoxContent .list ul img{width:53px;height:42px;margin-right:5px;}
+    .infoBoxContent .list ul p{padding:0;margin:0;}
+    .infoBoxContent .left{float:left;}
+    .infoBoxContent .rmb{float:right;color:#EB6100;font-size:14px;font-weight:bold;}
+    .infoBoxContent a{color:#0041D9;text-decoration:none;}
+  </style>
+  <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+  <link rel="stylesheet" href="http://api.map.baidu.com/library/MarkerClusterer/1.2/src/MarkerClusterer_min.css"/>
+  <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css"/>
+  <link rel="stylesheet" href="http://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.css"/>
+
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script>
+
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=Zyq6TjFQ1679hxUWSUhud4i03GThAEGI"></script>
+
+
+  <script type="text/javascript" src="http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/MarkerClusterer/1.2/src/MarkerClusterer_min.js"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.js"></script>
+
+  <script type="text/javascript" src="../js/BMapLib/RichMarker.min.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/InfoBox.min.js"></script>
+
+  <script type="text/javascript" src="../js/main.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/01addMap.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/02addControl.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/03styleMap.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/04marker.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/05richMarker.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/06infoBox.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/07cluster.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/08layers.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/09mapEvents.js"></script>
+<!--  <script type="text/javascript" src="../js/BMapLib/library/10poiSearch.js"></script>-->
+  <script type="text/javascript" src="../js/BMapLib/library/11addressDecode.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/12routeSearch.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/13geoLocation.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/14panorama.js"></script>
+  <script type="text/javascript" src="../js/BMapLib/library/15autoComplete.js"></script>
+<!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
+</head>
+<body>
+
+<div id="r-result">请输入:<input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
+<div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
+</body>
+
+<div id="results" style="width:400px;height: 500px;position: absolute;margin-top: 230px;margin-left:5px;z-index: 100; background-color: #4FA5FC">
+
+</div>
+
+<div id="routePanel" style="width:400px;height: 300px;position: absolute;margin-top: 600px;margin-left:1350px;z-index: 100; background-color: #73a06f; display: none;">
+
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 900px;margin-left:5px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: royalblue;color: antiquewhite; border-radius: 2px;" type="button" value="青花瓷" onclick="setMapStyleFromId()">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: #69b0ac;color: antiquewhite;" type="button" value="葱油绿" onclick="setMapStyleFromJson()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 900px;margin-left:175px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue;color: antiquewhite;" type="button" value="添加标注" onclick="addMapMarker()">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue;color: antiquewhite;" type="button" value="删除标注" onclick="removeMapMarker()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 900px;margin-left:345px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="添加富标注" onclick="addRichMarker()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="删除富标注" onclick="removeRichMarker()">
+</div>
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:520px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="设置点聚合" onclick="setCluster()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="改变样式" onclick="changStyles()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="删除点聚合" onclick="withoutCluster()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 900px;margin-left:800px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="矢量图层" onclick="addCanvasLayer()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="删除图层" onclick="removeCanvasLayer()">
+</div>
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:980px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="兴趣点搜索" onclick="poiSearch()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="附近搜索" onclick="nearbySearch()">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="范围搜索" onclick="inBoundSearch()">
+</div>
+
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:1250px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="地址解析" onclick="geoCode()">
+</div>
+
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:1350px;z-index: 101;">
+  <select id="routeSelect" style="width: 100px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;"  onChange="routeSearch()">
+    <option value="none">路线类型</option>
+    <option value="drive">驾车路线</option>
+    <option value="bus">公交路线</option>
+    <option value="walk">步行路线</option>
+    <option value="ride">骑行路线</option>
+  </select>
+</div>
+
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:1460px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="定位" onclick="mapLocation()">
+</div>
+
+<div style="width: 300px;height: 100px;position: absolute;margin-top: 900px;margin-left:1560px;z-index: 101;">
+  <input style="width: 80px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;" type="button" value="全景图" onclick="mapPanorama()">
+</div>
+
+<div id="allmap"> </div>
+
+</body>
+</html>
+<script type="text/javascript">
+
+  setMap();
+
+
+  var local = null; //公共变量 查询对象
+  var rendOpts = {
+    map:map,
+    autoViewport:true,
+    panel:"results",
+    selectFirstResult:false
+  };
+
+  var searchOpts = {
+    renderOptions: rendOpts,
+    pageCapacity:6,
+    onSearchComplete:function (results) {
+      if(local.getStatus() == BMAP_STATUS_SUCCESS){
+        var s = [];
+        for(var i=0;i<results.getCurrentNumPois();i++){
+          s.push(results.getPoi(i).title + "," + results.getPoi(i).address);
+        }
+        console.log(s.join("<br>"));
+      }
+    }
+  };
+
+  function clearSearch(){
+    if(local){
+      local.clearResults();
+    }
+  };
+
+  /**
+   * POI搜索
+   */
+  function poiSearch(){
+    //clearSearch();
+    local = new BMap.LocalSearch(map,searchOpts);
+    local.search("公园");
+  };
+
+  function nearbySearch(){
+    //clearSearch();
+    local = new BMap.LocalSearch(map,searchOpts);
+    local.searchNearby("酒店","三里庵");
+  };
+
+  function inBoundSearch(){
+    //clearSearch();
+    local = new BMap.LocalSearch(map,searchOpts);
+    local.searchInBounds("银行",map.getBounds());
+  };
+
+
+</script>
