@@ -5,7 +5,6 @@ function G(id){
   return document.getElementById(id);
 }
 
-
 /**
  * 加载地图事件
  **/
@@ -14,3 +13,4 @@ function setMap(){
   addMapControls();
   addDrawManager();
 }
+
