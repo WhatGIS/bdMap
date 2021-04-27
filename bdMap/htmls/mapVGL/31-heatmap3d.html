@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    #tools {
+      position: absolute;
+      z-index: 100;
+      right: 5px;
+      bottom: 5px;
+      padding: 10px;
+      color: #fff;
+      background: rgba(0, 0, 0, .5);
+    }
+
+
+    #tools button {
+      width: 100px;
+      height: 30px;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  // 6322,2363
+
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+  var map = initMap({
+    center: [116.387456,39.925406],
+    zoom: 13,
+    tilt: 30,
+    // style: whiteStyle
+  });
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  fetch('../../data/beijing.07102610.json').then(rs => {
+    return rs.json();
+  }).then(rs => {
+    rs = rs.result.data[0].bound;
+    var data = [];
+    for (var i = 0; i < rs.length; i++) {
+      var item = rs[i];
+      data.push({
+        geometry: {
+          type: 'Point',
+          coordinates: [item[0], item[1]]
+        },
+        properties: {
+          count: item[2]
+        }
+      });
+    }
+    var heatmap = new mapvgl.HeatmapLayer({
+      size: 20, // 单个点绘制大小
+      max: 40, // 最大阈值
+      height: 80, // 最大高度，默认为0
+      unit: 'px', // 单位，m:米，px: 像素
+      gradient: { // 对应比例渐变色
+        0.25: 'rgba(89, 233, 179, 1)',
+        0.55: 'rgba(182, 243, 147, 1)',
+        0.85: 'rgba(254, 255, 140, 1)',
+        0.9: 'rgba(217, 29, 28, 1)',
+      }
+    });
+    heatmap.setData(data);
+    view.addLayer(heatmap);
+  });
+</script>
+</body>
+</html>

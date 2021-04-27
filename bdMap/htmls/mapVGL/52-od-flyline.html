@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>OD飞线生成工具</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    .panel {
+      position: absolute;
+      z-index: 99;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .panel label {
+      font-size: 14px;
+      line-height: 2;
+    }
+    .panel .show {
+      display: none;
+      width: 4em;
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      color: rgba(84, 163, 223, .98);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .panel.hide {
+      visibility: hidden;
+    }
+    .panel.hide .show {
+      display: inline-block;
+      visibility: visible;
+    }
+    .panel .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      color: rgba(84, 163, 223, .98);
+      cursor: pointer;
+    }
+    .create-button {
+      margin: 6px 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<div class="panel">
+  <span class="show" onclick="togglePanel()">显示面板</span>
+  <span class="close" onclick="togglePanel()">收起</span>
+  <label for="origin">
+    请输入起点城市(多个系列以“；”分隔)
+  </label>
+  <textarea name="origin" id="origin" cols="30" rows="2"></textarea>
+  <label for="destination">
+    请输入终点城市（系列内以“，”分隔，系列以“；”分隔）
+  </label>
+  <textarea name="destination" id="destination" cols="30" rows="5"></textarea>
+  <button type="button" class="create-button" onclick="changeLine()">
+    生成飞线
+  </button>
+  <span> <label>
+                启用动画
+                <input id="animate" onchange="changeAnimate(event)" type="checkbox">
+            </label> <label>
+                显示城市名
+                <input id="city" onchange="changeDisplay(event, 'city')" checked type="checkbox">
+            </label> </span>
+</div>
+<script>
+  /* global BMapGL, mapv, mapvgl, initMap, darkStyle, whiteStyle, snowStyle */
+
+  /* eslint-disable */
+  var pt = new BMapGL.Point(131.733142,23.226515);
+  var jiuduanwidth = 227;
+  var jiuduanheight = 338;
+  var scale = 2.5;
+
+  var jiuduanIcon = new BMapGL.Icon(
+    'http://huiyan.baidu.com/github/tools/gis-drawing/static/images/jiuduanxian.png',
+    new BMapGL.Size(jiuduanwidth / scale, jiuduanheight / scale),
+    {
+      imageSize: new BMapGL.Size(jiuduanwidth / scale, jiuduanheight / scale)
+    }
+  );
+
+  var jiuduanxianMarker = new BMapGL.Marker(pt, {
+    icon: jiuduanIcon,
+    enableMassClear: false
+  });
+
+  let isAnimate = false;
+  let map = initMap({
+    tilt: 0,
+    heading: 0,
+    center: [105.552849,28.847593],
+    zoom: 5,
+    style: [
+      ...snowStyle,
+      {
+        featureType: 'water',
+        elementType: 'geometry',
+        stylers: {
+          visibility: 'on',
+          color: '#bde3fdff'
+        }
+      }
+    ],
+    displayOptions: {
+      poi: false
+    }
+  });
+  map.addOverlay(jiuduanxianMarker);
+  let view = new mapvgl.View({
+    map
+  });
+
+  let colors = {
+    lineColors: ['#f00', '#fa0', '#00f', '#f0f'],
+    textColors: ['#f00', '#fa0', '#00f', '#f0f'],
+    indexColors: ['#fff', '#fff', '#fff', '#fff']
+  };
+  let startCities = ['上海市', '银川市', '深圳', '西安'];
+  let endCities = [
+    ['北京', '呼和浩特', '哈尔滨', '长春', '南京', '长沙', '广州', '成都', '拉萨', '海口'],
+    ['天津', '太原'],
+    ['青海'],
+    ['青岛', '黑龙江']
+  ];
+  let lastStart = startCities.join('；');
+  let lastEnd = endCities.map(cities => cities.join('，')).join('；\n');
+  document.getElementById('origin').value = lastStart;
+  document.getElementById('destination').value = lastEnd;
+
+  let instances = createLines(startCities, endCities);
+
+  function togglePanel() {
+    let classList = document.querySelector('.panel').classList;
+    if (classList.contains('hide')) {
+      classList.remove('hide');
+      classList.add('show');
+    }
+    else {
+      classList.remove('show');
+      classList.add('hide');
+    }
+  }
+
+  function changeLine() {
+    let startList = document.getElementById('origin').value;
+    let endList = document.getElementById('destination').value;
+    if (lastStart === startList && lastEnd === endList) {
+      return;
+    }
+
+    lastStart = startList;
+    lastEnd = endList;
+    startCities = startList.split('；');
+    endCities = endList.split('；').map(item => item.replace(/\n| /g, '').split('，'));
+    instances.forEach(instance => instance.destroy());
+    instances = createLines(startCities, endCities);
+  }
+  // 动画开关
+  function changeAnimate(event) {
+    isAnimate = event.target.checked;
+    instances.forEach(instance => instance.animate(isAnimate));
+  }
+  // 城市显示控制
+  function changeDisplay(event, type) {
+    if (type === 'city') {
+      instances.forEach(ins => ins.displayChange(event.target.checked));
+    }
+  }
+  // 创建多系列OD飞线效果
+  function createLines(startCities, endCities) {
+    let instances = [];
+    let cityMap = getStartEndMap(startCities, endCities);
+
+    Object.keys(cityMap).forEach((city, index) => {
+      let option = {
+        isAnimate,
+        lineColor: colors.lineColors[index],
+        textColor: colors.lineColors[index],
+        indexColor: '#fff'
+      };
+      instances.push(createODLine(city, cityMap[city], option));
+    });
+    return instances;
+  }
+  // 创建飞线效果
+  function createODLine(startCity, endCities, option) {
+    let {
+      isAnimate,
+      lineColor = '#f00',
+      textColor = '#010101',
+      indexColor = '#fff',
+      lineWidth,
+      showText = true
+    } = option;
+
+    let textData = [];
+    let pointData = [];
+    let lineData = [];
+    let layers = [];
+
+    let curve = new mapvgl.OdCurve();
+    let startPoint = mapv.utilCityCenter.getCenterByCityName(startCity);
+    if (!startPoint) {
+      console.error('未获取到' + startCity + '对应坐标位置');
+      return;
+    }
+
+    startPoint = map.lnglatToMercator(startPoint.lng, startPoint.lat);
+    textData.push({
+      geometry: {
+        type: 'Point',
+        coordinates: [startPoint[0], startPoint[1]]
+      },
+      properties: {
+        text: startCity
+      }
+    });
+
+    endCities.forEach((item, index) => {
+      let endPoint = mapv.utilCityCenter.getCenterByCityName(item);
+      if (!endPoint) {
+        console.error('未获取到' + item + '对应坐标位置');
+        return;
+      }
+
+      endPoint = map.lnglatToMercator(endPoint.lng, endPoint.lat);
+      curve.setOptions({
+        points: [startPoint, endPoint]
+      });
+      let curveModelData = curve.getPoints(80);
+
+      lineData.push({
+        geometry: {
+          type: 'LineString',
+          coordinates: curveModelData
+        }
+      });
+      textData.push({
+        geometry: {
+          type: 'Point',
+          coordinates: [endPoint[0], endPoint[1]]
+        },
+        properties: {
+          text: endCities[index]
+        }
+      });
+      pointData.push({
+        geometry: {
+          type: 'Point',
+          coordinates: [endPoint[0], endPoint[1]]
+        },
+        properties: {
+          text: index + 1
+        }
+      });
+    });
+
+    let lineLayer = new mapvgl.LineLayer({
+      width: 4,
+      color: lineColor // 飞线颜色
+    });
+    view.addLayer(lineLayer);
+    lineLayer.setData(lineData);
+    layers.push(lineLayer);
+    // 动画飞线效果
+    let flowLineLayer = new mapvgl.LineFlowLayer({
+      color: 'rgb(255, 255, 0)', // 飞线动画颜色
+      step: 0.3
+    });
+    flowLineLayer.setData(lineData);
+    if (isAnimate) {
+      view.addLayer(flowLineLayer);
+      layers.push(flowLineLayer);
+    }
+
+    let pointLayer = new mapvgl.PointLayer({
+      size: 22,
+      color: lineColor
+    });
+    view.addLayer(pointLayer);
+    pointLayer.setData(pointData);
+    layers.push(pointLayer);
+    // 箭头辅助线
+    let arrowLineLayer = new mapvgl.LineLayer({
+      blend: 'lighter',
+      style: 'arrow',
+      styleOptions: {
+        color: lineColor,
+        with: lineWidth
+      },
+      width: 12,
+      color: 'rgb(0, 0, 0, 0)' // 飞线颜色
+    });
+    view.addLayer(arrowLineLayer);
+    arrowLineLayer.setData(lineData);
+    layers.push(arrowLineLayer);
+    // 起始地点
+    let textLayer1 = new mapvgl.TextLayer({
+      depthTest: false,
+      offset: [0, 0],
+      color: textColor,
+      fontFamily: 'PingFangSC-Medium'
+    });
+    view.addLayer(textLayer1);
+    textLayer1.setData([textData.shift()]);
+    layers.push(textLayer1);
+    // 目的地
+    let textLayer2 = new mapvgl.TextLayer({
+      depthTest: false,
+      offset: [0, -20],
+      color: textColor,
+      fontFamily: 'PingFangSC-Medium'
+    });
+    view.addLayer(textLayer2);
+    textLayer2.setData(textData);
+    layers.push(textLayer2);
+    // 排行文字
+    let indexLayer = new mapvgl.TextLayer({
+      depthTest: false,
+      offset: [0, 0],
+      padding: [0, 0],
+      color: indexColor
+    });
+    view.addLayer(indexLayer);
+    indexLayer.setData(pointData);
+    layers.push(indexLayer);
+
+    return {
+      destroy() {
+        layers.forEach(layer => view.removeLayer(layer));
+      },
+      animate(flag) {
+        if (flag !== isAnimate) {
+          isAnimate = flag;
+          if (!flag) {
+            view.removeLayer(flowLineLayer);
+          }
+          else {
+            view.addLayer(flowLineLayer);
+          }
+        }
+
+      },
+      displayChange(flag) {
+        if (showText !== flag) {
+          showText = flag;
+          if (!flag) {
+            pointLayer.setOptions({
+              size: 10
+            });
+            // view.removeLayer(pointLayer);
+            view.removeLayer(textLayer1);
+            view.removeLayer(textLayer2);
+            view.removeLayer(indexLayer);
+          }
+          else {
+            pointLayer.setOptions({
+              size: 22
+            });
+            view.addLayer(pointLayer);
+            view.addLayer(textLayer1);
+            view.addLayer(textLayer2);
+            view.addLayer(indexLayer);
+          }
+        }
+
+      }
+    };
+  }
+
+  function getStartEndMap(startCities, endCities) {
+    let map = {};
+    console.log(startCities, endCities);
+    startCities.forEach((city, index) => {
+      if (!city) {
+        return;
+      }
+
+      let cities = endCities[index];
+      if (!cities || !cities.join('')) {
+        return;
+      }
+
+      cities = cities.filter(city => city);
+      if (map[city]) {
+        map[city] = Array.from(new Set(map[city].concat(cities)));
+      }
+      else {
+        map[city] = cities;
+      }
+    });
+    return map;
+  }
+</script>
+</body>
+</html>

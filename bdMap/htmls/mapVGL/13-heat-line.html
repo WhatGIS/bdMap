@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  /* global whiteStyle */
+
+  /* global purpleStyle */
+
+  var map = initMap({
+    tilt: 55,
+    heading: 0,
+    center: [106.517615,29.551211],
+    zoom: 13,
+    style: purpleStyle
+  });
+
+  var view = new mapvgl.View({
+    // effects: [new mapvgl.BloomEffect({
+    //     blurSize: 3
+    // })],
+    map: map
+  });
+
+  fetch('../../data/car.csv').then(rs => {
+    return rs.text();
+  }).then(csvstr => {
+    var dataSet = mapv.csv.getDataSet(csvstr);
+    var data = dataSet.get();
+    for (var i = 0; i < data.length; i++) {
+      data[i].properties = {
+        count: data[i].geometry.coordinates.length
+      };
+    }
+
+    var layer = new mapvgl.HeatLineLayer({
+      min: 0,
+      max: 100,
+      gradient: { // 对应比例渐变色
+        0.5: 'rgba(0, 0, 255, 0.4)',
+        0.7: 'rgba(0, 102, 255, 0.3)',
+        0.8: 'rgba(102, 255, 255,0.3)',
+        0.9: 'rgba(204, 255, 255,0.5)'
+      }
+    });
+    view.addLayer(layer);
+    layer.setData(data);
+  });
+</script>
+</body>
+</html>

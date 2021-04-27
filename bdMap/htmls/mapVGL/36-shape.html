@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  var map = initMap({
+    tilt: 80,
+    heading: -45.3,
+    center: [106.542353,29.565448],
+    zoom: 17
+  });
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  fetch('../../data/chongqing.json').then(function (rs) {
+    return rs.json();
+  }).then(function (rs) {
+    var data = rs;
+    var polygons = [];
+    var len = data.length;
+    for (var i = 0; i < len; i++) {
+      var line = data[i];
+      var polygon = [];
+      var pt = [line[1] * 512, line[2] * 512];
+      for (var j = 3; j < line.length; j += 2) {
+        pt[0] += line[j] / 100 / 2;
+        pt[1] += line[j + 1] / 100 / 2;
+        polygon.push([pt[0], pt[1]]);
+      }
+
+      if (Math.random() > 0.5) {
+        polygons.push({
+          geometry: {
+            type: 'Polygon',
+            coordinates: [polygon]
+          },
+          properties: {
+            height: line[0] / 2
+          }
+        });
+      }
+
+    }
+
+    var shapeLayer = new mapvgl.ShapeLayer({
+      color: 'rgba(194, 147, 75, 0.8)', // 柱状图颜色
+      enablePicked: true, // 是否可以拾取
+      selectedIndex: -1, // 选中项
+      selectedColor: '#ee1111', // 选中项颜色
+      autoSelect: true, // 根据鼠标位置来自动设置选中项
+      onClick: (e) => { // 点击事件
+        console.log(e);
+      },
+    });
+    view.addLayer(shapeLayer);
+    shapeLayer.setData(polygons);
+
+    map.setDefaultCursor('default');
+
+    /*
+    setInterval(() => {
+        polygons = polygons.map((item) => {
+            item.properties.preHeight = item.properties.height;
+            item.properties.height = Math.random() * 100;
+            return item;
+        });
+        shapeLayer.setData(polygons);
+    }, 2000);
+    */
+
+  });
+</script>
+</body>
+</html>

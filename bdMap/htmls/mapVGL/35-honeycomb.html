@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  var map = initMap({
+    tilt: 10,
+    center: [116.395645,39.929986],
+    zoom: 9
+  });
+  var data = [];
+
+  var randomCount = 10000;
+  var cityCenter = mapv.utilCityCenter.getCenterByCityName('北京');
+  // 构造数据
+  while (randomCount--) {
+    data.push({
+      geometry: {
+        type: 'Point',
+        coordinates: [cityCenter.lng - 0.2  + Math.random() * 0.5, cityCenter.lat - 0.2 + Math.random() * 0.5]
+      }
+    });
+  }
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  var honeycombLayer = new mapvgl.HoneycombLayer({
+    // 设置颜色梯度
+    gradient: {
+      0.0: 'rgb(50, 50, 256)',
+      0.1: 'rgb(50, 250, 56)',
+      0.5: 'rgb(250, 250, 56)',
+      1.0: 'rgb(250, 50, 56)'
+    },
+    // 是否显示文字
+    showText: true,
+    // 设置文字样式
+    textOptions: {
+      fontSize: 13,
+      color: '#444444',
+      format: function (count) {
+        return count >= 10000 ? Math.round(count / 1000) + 'k'
+          : count >= 1000 ? Math.round(count / 100) / 10 + 'k' : count;
+      }
+    },
+    height: 100, // 最大值的像素高度，为0时显示平面
+    // enableCluster: true, // 开启点聚合，建议数据量较大时打开，会提前根据地图级别将距离较近的点进行聚合
+    opacity: 0.1, // 透明度
+    maxZoom: 16, // 图层刷新最大地图级别，高于此值不再更新图层
+    minZoom: 8, // 图层刷新最小地图级别，低于此值不再更新图层
+    size: 50 // 蜂窝图像素宽度
+  });
+  view.addLayer(honeycombLayer);
+  honeycombLayer.setData(data);
+
+</script>
+</body>
+</html>

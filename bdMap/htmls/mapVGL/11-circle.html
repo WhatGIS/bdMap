@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  /* global whiteStyle */
+
+  var map = initMap({
+    tilt: 30,
+    heading: 0,
+    center: [116.395645,39.929986],
+    zoom: 5,
+    style: whiteStyle,
+    skyColors: [
+      // 地面颜色
+      'rgba(226, 237, 248, 0)',
+      // 天空颜色
+      'rgba(186, 211, 252, 1)'
+    ]
+  });
+
+  var view = new mapvgl.View({
+    map: map
+  });
+  var cities = [
+    '北京',
+    '上海',
+    '重庆',
+    '太原',
+    '呼和浩特',
+    '哈尔滨',
+    '沈阳',
+    '济南',
+    '南京',
+    '合肥',
+    '长春',
+    '杭州',
+    '南昌',
+    '福州',
+    '郑州',
+    '武汉',
+    '长沙',
+    '广州',
+    '南宁',
+    '西安',
+    '银川',
+    '兰州',
+    '西宁',
+    '乌鲁木齐',
+    '成都',
+    '贵阳',
+    '昆明',
+    '拉萨',
+    '海口'
+  ];
+  var colors = ['#f00', '#ff0', '#0ff', '#00f'];
+  var data = cities.map((city, index) => {
+    var cityCenter = mapv.utilCityCenter.getCenterByCityName(city);
+    return {
+      geometry: {
+        type: 'Point',
+        coordinates: [cityCenter.lng, cityCenter.lat]
+      },
+      color: colors[index % 4],
+      // 圆的半径
+      size: 8
+    };
+  });
+
+  var simpleLayer = new mapvgl.CircleLayer({
+    // 默认类型，绘制简单圆
+    type: 'simple',
+    enablePicked: true,
+    selectedColor: '#f0f', // 选中项颜色
+    autoSelect: true, // 根据鼠标位置来自动设置选中项
+    onClick: (e) => { // 点击事件
+      console.log(e);
+    }
+  });
+  view.addLayer(simpleLayer);
+  simpleLayer.setData(data.slice(0, 3));
+
+  var waveLayer = new mapvgl.CircleLayer({
+    // 绘制带波纹扩散的圆
+    type: 'wave',
+    // 扩散半径，支持直接设置和回调两种形式
+    radius: 25,
+    // 周期影响扩散速度，越小越快
+    duration: 1 / 3,
+    // 拖尾影响波纹数，越大越多
+    trail: 4
+  });
+  view.addLayer(waveLayer);
+  waveLayer.setData(data.slice(3, 8));
+
+  var bubbleLayer = new mapvgl.CircleLayer({
+    // 绘制带泡泡的圆
+    type: 'bubble',
+    // 扩散半径，支持直接设置和回调两种形式，size为点的大小
+    radius(size) {
+      return 2 * size;
+    },
+    // 扩散时间
+    duration: 1,
+    // 渐隐时间
+    trail: 1
+  });
+  view.addLayer(bubbleLayer);
+  bubbleLayer.setData(data.slice(8, 20));
+
+  var breathLayer = new mapvgl.CircleLayer({
+    // 绘制带泡泡的圆
+    type: 'breath',
+    // 扩散半径，支持直接设置和回调两种形式，size为点的大小
+    radius(size) {
+      return size;
+    },
+    // 显示时间
+    duration: 3,
+    // 渐隐时间
+    trail: 3
+  });
+  view.addLayer(breathLayer);
+  breathLayer.setData(data.slice(20));
+</script>
+</body>
+</html>

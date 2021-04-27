@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  /* global darkStyle */
+  var map = initMap({
+    tilt: 30,
+    heading: 0,
+    center: [109.792816,27.702774],
+    zoom: 5,
+    style: darkStyle
+  });
+
+  var data = [];
+
+  var citys = [
+    '北京', '天津', '上海', '重庆', '石家庄', '太原', '呼和浩特', '哈尔滨',
+    '长春', '沈阳', '济南', '南京', '合肥', '杭州', '南昌', '福州', '郑州',
+    '武汉', '长沙', '广州', '南宁', '西安', '银川', '兰州', '西宁', '乌鲁木齐',
+    '成都', '贵阳', '昆明', '拉萨', '海口'
+  ];
+
+  var randomCount = 100;
+
+  // 构造数据
+  while (randomCount--) {
+    var cityName = citys[parseInt(Math.random() * citys.length, 10)];
+    var cityCenter = mapv.utilCityCenter.getCenterByCityName(cityName);
+    data.push({
+      geometry: {
+        type: 'Point',
+        coordinates: [cityCenter.lng - 2 + Math.random() * 4, cityCenter.lat - 2 + Math.random() * 4]
+      },
+      properties: {
+        text: '￥' + (Math.random() * 10).toFixed(2)
+      }
+    });
+  }
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  var textLayer = new mapvgl.TextLayer({
+    // fontFamily: 'Songti SC',
+    enablePicked: true,
+    autoSelect: true,
+    selectedColor: '#f00', // 选中项颜色
+    color: '#ff0'
+  });
+
+  view.addLayer(textLayer);
+  textLayer.setData(data);
+</script>
+</body>
+</html>

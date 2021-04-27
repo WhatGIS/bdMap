@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" >
+  <title>BMapGL</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" >
+  <style type="text/css">
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+  </style>
+
+  <script type="text/javascript" src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script type="text/javascript" src="../../js/common.js"></script>
+  <script type="text/javascript" src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+
+</head>
+<body>
+
+<div id="map_container"></div>
+
+
+<script>
+
+  /* global BMapGL */
+
+
+  var map = initMap({
+    tilt: 60,
+    heading: 30,
+    center: [116.318315,40.058654],
+    zoom: 20
+  });
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  var timeOffset = 1526774400;
+
+  fetch('../../data/guiji.xierqi.json').then(function(rs) {
+    return rs.json();
+  }).then(function(rs) {
+    rs = rs.data;
+    var data = [];
+    var startTime = null;
+    var endTime = null;
+    for (var key in rs) {
+      var group = rs[key];
+      for (var i = 0; i < group.length; i++) {
+        var line = group[i];
+        var traj_base = line.traj_base.split(',');
+        traj_base[0] = ~~traj_base[0];
+        traj_base[1] = ~~traj_base[1];
+
+        var time_base = ~~(line.time_base);
+        if (startTime === null) {
+          startTime = time_base;
+        }
+
+        if (endTime === null) {
+          endTime = time_base;
+        }
+
+        startTime = Math.min(startTime, time_base);
+        endTime = Math.max(endTime, time_base);
+
+        var traj_list = line.traj_list;
+        var time_list = line.time_list;
+        var add = 0;
+        var traj = [];
+        var timeArr = [];
+        for (var j = 0; j < time_list.length; j++) {
+          timeArr.push(time_base + ~~(time_list[j]));
+          traj.push([
+            traj_base[0] + ~~(traj_list[j][0]),
+            traj_base[1] + ~~(traj_list[j][1]),
+            1,
+            time_base + ~~(time_list[j]) - timeOffset
+          ]);
+        }
+        data.push({
+          time: timeArr,
+          geometry: {
+            type: 'LineString',
+            coordinates: traj
+          }
+        });
+      }
+    }
+
+    var lineLayer = new mapvgl.LineTripLayer({
+      step: 0.3,
+      trailLength: 20,
+      startTime: startTime - timeOffset,
+      endTime: endTime - timeOffset,
+      color: [0, 255, 255]
+    });
+    view.addLayer(lineLayer);
+    lineLayer.setData(data);
+  });
+
+</script>
+</body>
+</html>

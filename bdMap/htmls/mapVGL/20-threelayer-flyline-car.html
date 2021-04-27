@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" >
+  <title>MapVGL</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" >
+  <style type="text/css">
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+  </style>
+  <script type="text/javascript" src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script type="text/javascript" src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script type="text/javascript" src="../../js/common.js"></script>
+  <script type="text/javascript" src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+  <script type="text/javascript" src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.threelayers.min.js"></script>
+
+</head>
+<body>
+
+<div id="map_container"></div>
+
+<script>
+
+  /* global BMapGL */
+  /* global Stats */
+  /* global mapv */
+  var map = initMap();
+
+  map.setTilt(80);
+  // beijing
+  var point = new BMapGL.Point(106.560734,29.566986);
+  map.centerAndZoom(point, 14);
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  fetch('../../data/car.csv').then(function(rs) {
+    return rs.text();
+  }).then(function(csvstr) {
+    var dataSet = mapv.csv.getDataSet(csvstr);
+    var data = dataSet.get();
+    data = data.splice(0, 200);
+
+    var lineLayer = new mapvgl.FlyLineLayer({
+      speed: 6,
+      color: 'rgb(57, 254, 247)',
+      textureColor: function (data) {
+        return '#56ccdd';
+      },
+      textureWidth: 3,
+      textureLength: 10,
+    });
+    view.addLayer(lineLayer);
+    lineLayer.setData(data);
+  });
+
+</script>
+</body>
+</html>

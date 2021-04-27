@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="../../js/common.js"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  /* global darkStyle */
+
+  var map = initMap({
+    tilt: 40,
+    heading: 0,
+    center: [109.792816,27.702774],
+    zoom: 6,
+    style: darkStyle,
+    skyColors: [
+      // 地面颜色
+      'rgba(226, 237, 248, 0)',
+      // 天空颜色
+      'rgba(186, 211, 252, 1)'
+    ]
+  });
+
+  var data = [];
+
+  var citys = [
+    '北京', '天津', '石家庄',
+    '太原', '上海', '重庆', '呼和浩特',
+    '长春', '沈阳', '济南', '南京', '合肥', '杭州', '南昌', '福州', '郑州',
+    '武汉', '长沙', '广州', '南宁', '西安'
+  ];
+
+  var randomCount = citys.length;
+
+  // 构造数据
+  while (randomCount--) {
+    var cityCenter = mapv.utilCityCenter.getCenterByCityName(citys[randomCount]);
+    data.push({
+      geometry: {
+        type: 'Point',
+        coordinates: [cityCenter.lng, cityCenter.lat]
+      },
+      value: [
+        Math.random() * 100 + 50,
+        Math.random() * 100 + 100,
+        Math.random() * 100 + 200,
+        Math.random() * 100 + 300
+      ],
+      // 设置总高度，每段会根据比例生成各自的高度
+      // height: 200 * 1000 + Math.random() * 200 * 1000,
+      // 同时支持函数设置和数组
+      height: function (value, index, array) {
+        return value * 500;
+      },
+      size: 20 * 1000,
+      color: ['rgba(0, 100, 255, 1)', 'rgba(0, 200, 200, 1)', 'rgba(0, 200, 100, 1)', 'rgba(255, 220, 0, 1)']
+    });
+  }
+
+  var view = new mapvgl.View({
+    map: map
+  });
+
+  var layer = new mapvgl.BarLayer({
+    // size: 20 * map.getZoomUnits(),
+    // 柱体的边数，可设置较大值趋近圆柱
+    edgeCount: 50,
+    // color: ['blue', 'green', 'yellow', 'red']
+    // color: function (value, index, array) {
+    //     var max = 0;
+    //     var min = 0;
+    //     array.forEach(function (a) {
+    //         if (max < a) {
+    //             max = a;
+    //         }
+    //         if (min > a) {
+    //             min = a;
+    //         }
+    //     });
+    //     let val = parseInt(value / (max - min) * 255, 10);
+    //     return 'rgba( 0, ' + val + ',' + (255 - val) + ', 1)';
+    // }
+  });
+  view.addLayer(layer);
+  layer.setData(data);
+
+  var lightLayer = new mapvgl.BarLayer({
+    type: 'light',
+    height: 200 * 1000,
+    edgeCount: 50,
+    size: 20 * 1000
+  });
+  view.addLayer(lightLayer);
+  lightLayer.setData(
+    ['银川', '兰州', '西宁', '乌鲁木齐', '成都', '贵阳', '昆明', '拉萨'].map(function (item) {
+      var cityCenter = mapv.utilCityCenter.getCenterByCityName(item);
+      return {
+        geometry: {
+          type: 'Point',
+          coordinates: [cityCenter.lng, cityCenter.lat]
+        },
+        value: Math.random() * 100 + 50
+      };
+    })
+  );
+
+</script>
+</body>
+</html>

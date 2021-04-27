@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+  <script src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global BMapGL */
+
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+  var map = initMap();
+
+  var point = new BMapGL.Point(116.387456,39.925406);
+  map.centerAndZoom(point, 12.0);
+
+  map.setHeading(30);
+
+  var view = new mapvgl.View({
+
+    /*
+    effects: [new mapvgl.BloomEffect({
+        blurSize: 3
+    })],
+    */
+    map: map
+  });
+
+  var grid = new mapvgl.HeatGridLayer({
+    max: 80, // 最大阈值
+    min: 10, // 最小阈值
+    // color: function() {
+    //     return 'rgb(200, 255, 0)';
+    // },
+    gridSize: 500,
+    // style: 'normal',
+    gradient: { // 对应比例渐变色
+      0: 'rgb(50, 50, 256)',
+      0.3: 'rgb(178, 202, 256)',
+      1: 'rgb(250, 250, 256)'
+    },
+    riseTime: 1800, // 楼块初始化升起时间
+    maxHeight: 10000, // 最大高度
+    minHeight: 200 // 最小高度
+  });
+  view.addLayer(grid);
+
+  fetch('../../data/beijing.07102610.json').then(rs => {
+    return rs.json();
+  }).then(rs => {
+    rs = rs.result.data[0].bound;
+    var data = [];
+    for (var i = 0; i < rs.length; i++) {
+      var item = rs[i];
+      data.push({
+        geometry: {
+          type: 'Point',
+          coordinates: [item[0], item[1]]
+        },
+        properties: {
+          count: item[2]
+        }
+      });
+    }
+    grid.setData(data);
+
+    setTimeout(() => {
+      grid.setOptions({
+        gridSize: 100
+      });
+    }, 5000);
+  });
+</script>
+</body>
+</html>

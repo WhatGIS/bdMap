@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>MapVGL</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }
+  </style>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+</head>
+<body>
+<div id="map_container"></div>
+<script>
+  /* global mapv */
+
+  /* global mapvgl */
+
+  /* global initMap */
+
+  var zoom = 18;
+
+  var map = {
+    center: {lng: 11862480.06, lat: 3426949.47},
+    zoomUnits: Math.pow(2, 18 - zoom),
+    container: document.getElementById('map_container'),
+    size: {
+      width: document.body.clientWidth,
+      height: document.body.clientHeight
+    },
+    tilt: 60,
+    heading: 0
+  };
+
+  var flag = true;
+  function animation() {
+    map.heading += 0.1;
+    if (map.heading > 360) {
+      map.heading = 0;
+    }
+
+    if (flag) {
+      map.tilt += 0.03;
+      if (map.tilt > 80) {
+        flag = false;
+      }
+    }
+    else {
+      map.tilt -= 0.03;
+      if (map.tilt < 70) {
+        flag = true;
+      }
+    }
+    zoom -= 0.003;
+    if (zoom < 17.5) {
+      zoom = 17.5;
+    }
+
+    map.zoomUnits = Math.pow(2, 18 - zoom),
+      requestAnimationFrame(animation);
+  }
+  requestAnimationFrame(animation);
+
+  var view = new mapvgl.View({
+    effects: [new mapvgl.BloomEffect({
+      threshold: 0.8
+    })],
+    mapType: 'blank',
+    map: map
+  });
+
+  fetch('../../data/chongqing.json').then(function (rs) {
+    return rs.json();
+  }).then(function (rs) {
+    var data = rs;
+    var polygons = [];
+    var len = data.length;
+    for (var i = 0; i < len; i++) {
+      var line = data[i];
+      var polygon = [];
+      var pt = [line[1] * 512, line[2] * 512];
+      for (var j = 3; j < line.length; j += 2) {
+        pt[0] += line[j] / 100 / 2;
+        pt[1] += line[j + 1] / 100 / 2;
+        polygon.push([pt[0], pt[1]]);
+      }
+
+      polygons.push({
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygon]
+        },
+        properties: {
+          height: line[0] / 2
+        }
+      });
+    }
+
+    var shaperLayer = new mapvgl.ShapeLayer({
+      texture: '../../img/light.jpg',
+      isTextureFull: true,
+      // texture: 'images/heatmap.png',
+      blend: 'lighter',
+      color: [0.8, 0.8, 0.1],
+      opacity: 1.0
+    });
+    view.addLayer(shaperLayer);
+    shaperLayer.setData(polygons);
+    view.startAnimation();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" >
+  <title>MapVGL</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" >
+  <style type="text/css">
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    #map_container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+  </style>
+  <script type="text/javascript" src="//api.map.baidu.com/api?v=1.0&type=webgl&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+  <script type="text/javascript" src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+
+</head>
+<body>
+
+<div id="map_container"></div>
+
+<script>
+
+  /* global BMapGL */
+  /* global Stats */
+  /* global mapv */
+  /* global Float32Array */
+
+  var map = new BMapGL.Map('map_container');
+
+  map.setTilt(47);
+  // beijing
+  var point = new BMapGL.Point(116.307706,40.056953);
+
+  map.centerAndZoom(point, 19);
+
+  map.enableKeyboard();
+  map.enableScrollWheelZoom();
+  map.enableInertialDragging();
+  map.enableContinuousZoom();
+
+  var webglLayer = new mapvgl.WebglLayer(map, {
+    onInitialize: function (gl) {
+      var vertexSource = ''
+        + 'uniform mat4 u_matrix;'
+        + 'attribute vec2 a_pos;'
+        + 'void main() {'
+        + '    gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);'
+        + '}';
+
+      var fragmentSource = ''
+        + 'void main() {'
+        + '    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);'
+        + '}';
+
+      var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vertexShader, vertexSource);
+      gl.compileShader(vertexShader);
+      var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fragmentShader, fragmentSource);
+      gl.compileShader(fragmentShader);
+
+      this.program = gl.createProgram();
+      gl.attachShader(this.program, vertexShader);
+      gl.attachShader(this.program, fragmentShader);
+      gl.linkProgram(this.program);
+
+      this.aPos = gl.getAttribLocation(this.program, 'a_pos');
+
+      this.buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        12947440.9, 4846560.26,
+        12947392.81, 4846374.69,
+        12947599.31, 4846418.29
+      ]), gl.STATIC_DRAW);
+    },
+    onRender: function({gl, matrix}) {
+      gl.clearColor(0 / 255, 0 / 255, 255 / 255, 0.0);
+      gl.colorMask(true, true, true, true);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.useProgram(this.program);
+      gl.uniformMatrix4fv(gl.getUniformLocation(this.program, 'u_matrix'), false, matrix);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+      gl.enableVertexAttribArray(this.aPos);
+      gl.vertexAttribPointer(this.aPos, 2, gl.FLOAT, false, 0, 0);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
+    }
+  });
+
+
+</script>
+</body>
+</html>
