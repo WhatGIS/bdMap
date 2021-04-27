@@ -85,3 +85,6 @@
 39. [百度地图（39）-GL 轨迹动画](https://www.cnblogs.com/googlegis/p/14707744.html)
 
 40. [百度地图（40）-GL 路书](https://www.cnblogs.com/googlegis/p/14707804.html)
+
+41. [百度地图（40）-GL 工具](https://www.cnblogs.com/googlegis/p/14708373.html)
+

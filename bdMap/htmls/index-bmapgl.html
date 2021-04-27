@@ -137,6 +137,55 @@
       color: #fff;
       font-size: 14px;
     }
+
+    .info {
+      z-index: 999;
+      width: auto;
+      min-width: 22rem;
+      padding: .75rem 1.25rem;
+      margin-left: 1.25rem;
+      position: fixed;
+      top: 1rem;
+      background-color: #fff;
+      border-radius: .25rem;
+      font-size: 14px;
+      color: #666;
+      box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+    }
+    .drawing-panel {
+      z-index: 999;
+      position: fixed;
+      bottom: 8.5rem;
+      margin-left: 2.5rem;
+      padding-left: 0;
+      border-radius: .25rem;
+      height: 47px;
+      box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+    }
+    .bmap-btn {
+      border-right: 1px solid #d2d2d2;
+      float: left;
+      width: 64px;
+      height: 100%;
+      background-image: url(//api.map.baidu.com/library/DrawingManager/1.4/src/bg_drawing_tool.png);
+      cursor: pointer;
+    }
+    .drawing-panel .bmap-marker {
+      background-position: -65px 0;
+    }
+    .drawing-panel .bmap-polyline {
+      background-position: -195px 0;
+    }
+    .drawing-panel .bmap-rectangle {
+      background-position: -325px 0;
+    }
+    .drawing-panel .bmap-polygon {
+      background-position: -260px 0;
+    }
+    .drawing-panel .bmap-circle {
+      background-position: -130px 0;
+    }
+
   </style>
 
   <!--  去除“百度地图”左下角字样  -->
@@ -168,6 +217,10 @@
   <script type="text/javascript" src="//api.map.baidu.com/library/TrackAnimation/src/TrackAnimation_min.js"></script>
   <script type="text/javascript" src="//api.map.baidu.com/library/LuShu/gl/src/LuShu_min.js"></script>
 
+  <link href="//mapopen.cdn.bcebos.com/github/BMapGLLib/DrawingManager/src/DrawingManager.min.css" rel="stylesheet">
+  <script type="text/javascript" src="//mapopen.bj.bcebos.com/github/BMapGLLib/DrawingManager/src/DrawingManager.min.js"></script>
+  <script type="text/javascript" src="//mapopen.cdn.bcebos.com/github/BMapGLLib/DistanceTool/src/DistanceTool.min.js"></script>
+
   <!--  <script type="text/javascript" src="../js/BMapGLLib/RichMarkerGL.js"></script>-->
   <script type="text/javascript" src="../js/MapLib/CoordTransferd.js"></script>
   <script type="text/javascript" src="../js/MapLib/proj4-src.js"></script>
@@ -193,9 +246,17 @@
   <script type="text/javascript" src="../js/BMapGLLib/library/17animation.js"></script>
   <script type="text/javascript" src="../js/BMapGLLib/library/18track.js"></script>
   <script type="text/javascript" src="../js/BMapGLLib/library/19lushu.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/20MapTools.js"></script>
 <!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
 </head>
 <body>
+
+<ul class = "drawing-panel">
+  <li class="bmap-btn bmap-polyline" id="polyline" onclick="draw(this)"></li>
+  <li class="bmap-btn bmap-rectangle" id="rectangle" onclick="draw(this)"></li>
+  <li class="bmap-btn bmap-polygon" id="polygon" onclick="draw(this)"></li>
+  <li class="bmap-btn bmap-circle" id="circle" onclick="draw(this)"></li>
+</ul>
 
 <div id="r-result">请输入:<input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
 <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto;"></div>
@@ -334,6 +395,18 @@
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="IP定位" onclick="cityLocation()">
   <br/>
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="辅助定位" onclick="sdkLocation()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:905px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="开启测距" onclick="openMapDis()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="关闭测距" onclick="closeMapDis()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="开启测面" onclick="addAreaMeasure()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="关闭测面" onclick="addDrawManager()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="绘制功能" onclick="sdkLocation()">
 </div>
 
 
