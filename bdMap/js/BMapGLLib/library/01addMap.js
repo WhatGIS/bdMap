@@ -4,15 +4,12 @@
  **/
 function initialMap() {
   map = new BMapGL.Map("allmap");
-  addMapLoaded();
-  map.centerAndZoom(point,15);// 初始化地图，中心点和缩放级别
+  //addMapLoaded();
+  map.centerAndZoom(new BMapGL.Point(116.274625,39.961627), 15);// 初始化地图，中心点和缩放级别
   map.enableScrollWheelZoom(true);//支持滚轴缩放
 
   map.setHeading(0);//地图旋转角度
   map.setTilt(70);//倾斜角
-
-
-
 }
 
 /**

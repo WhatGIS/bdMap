@@ -1,81 +1,107 @@
+var data = [];
 
-var markerCluster = null;
+var citys = [
+  '北京',
+  '天津',
+  '上海',
+  '重庆',
+  '石家庄',
+  '太原',
+  '呼和浩特',
+  '哈尔滨',
+  '长春',
+  '沈阳',
+  '济南',
+  '南京',
+  '合肥',
+  '杭州',
+  '南昌',
+  '福州',
+  '郑州',
+  '武汉',
+  '长沙',
+  '广州',
+  '南宁',
+  '西安',
+  '银川',
+  '兰州',
+  '西宁',
+  '乌鲁木齐',
+  '成都',
+  '贵阳',
+  '昆明',
+  '拉萨',
+  '海口'
+];
 
-var i =1;
+var randomCount = 100000;
 
-var defaultStyles;
+function addClusters(){
 
-var myStyles = [{
-  url: '/bdMap/img/cluster/m1.png',
-  size: new BMap.Size(53, 52),
-  //opt_anchor: [16, 0],
-  textColor: '#f5f1f6',
-  opt_textSize: 10
-}, {
-  url: '/bdMap/img/cluster/m2.png',
-  size: new BMap.Size(56, 55),
-  //opt_anchor: [40, 35],
-  textColor: '#ebecf1',
-  opt_textSize: 12
-}, {
-  url: '/bdMap/img/cluster/m3.png',
-  size: new BMap.Size(78, 77),
-  //opt_anchor: [32, 0],
-  textColor: '#e5e6ec',
-  opt_textSize: 14
-}];
-
-/**
- * 点的聚合
- */
-function setCluster(){
-
-  var MAX = 100 * 1;
-  var markers = [];
-  var pt = null;
-  var i=0;
-  for(;i < MAX; i++){
-    pt = new BMap.Point(Math.random() * 40 + 85, Math.random() * 30 + 21);
-    markers.push(new BMap.Marker(pt));
+  map.centerAndZoom(new BMapGL.Point(109.792816,27.702774),5);
+  // 构造数据
+  while (randomCount--) {
+    var cityCenter = mapv.utilCityCenter.getCenterByCityName(
+      citys[parseInt(Math.random() * citys.length, 10)]
+    );
+    data.push({
+      geometry: {
+        type: 'Point',
+        coordinates: [cityCenter.lng - 2 + Math.random() * 4, cityCenter.lat - 2 + Math.random() * 4]
+      },
+      properties: {
+        icon: [
+          '../img/marker.png',
+          '../img/icon-accident.png',
+          '../img/icon-location.png',
+          '../img/icon-airplane.png'
+        ][randomCount % 4],
+        width: randomCount % 2 === 0 ? 100 / 4 : 30,
+        height: randomCount % 2 === 0 ? 153 / 4 : 30
+      }
+    });
   }
 
-  if(markerCluster){
-    markerCluster.addMarkers(markers);
-  } else {
-    markerCluster = new BMapLib.MarkerClusterer(map,{markers:markers}); //请记住是 MarkerClusterer
-  }
+  var view = new mapvgl.View({
+    map: map
+  });
 
-  if(!defaultStyles)
-  {
-    defaultStyles = markerCluster.getStyles();
-  }
+  var clusterLayer = new mapvgl.ClusterLayer({
+    minSize: 30, // 聚合点显示的最小直径
+    maxSize: 50, // 聚合点显示的最大直径
+    clusterRadius: 150, // 聚合范围半径
+    gradient: {0: 'blue', 0.5: 'green', 1.0: 'red'}, // 聚合点颜色梯度
+    maxZoom: 15, // 聚合的最大级别，当地图放大级别高于此值将不再聚合
+    minZoom: 5, // 聚合的最小级别，当地图放大级别低于此值将不再聚合
+    // 是否显示文字
+    showText: true,
+    // 开始聚合的最少点数，点数多于此值才会被聚合
+    minPoints: 5,
+    // 设置文字样式
+    textOptions: {
+      fontSize: 12,
+      color: 'white',
+      // 格式化数字显示
+      format: function (count) {
+        return count >= 10000 ? Math.round(count / 1000) + 'k'
+          : count >= 1000 ? Math.round(count / 100) / 10 + 'k' : count;
+      }
+    },
+    // 设置非聚合的点的icon
+    // iconOptions: {
+    //     width: 100 / 4,
+    //     height: 153 / 4,
+    //     icon: 'images/marker.png',
+    // },
+    enablePicked: true,
+    onClick(e) {
+      if (e.dataItem) {
+        // 可通过dataItem下面的children属性拿到被聚合的所有点
+        console.log(e.dataItem);
+      }
+    }
+  });
+
+  view.addLayer(clusterLayer);
+  clusterLayer.setData(data);
 }
-
-var styleType =0;
-function changStyles(){
-  if(styleType == 0){
-    markerCluster.setStyles(myStyles);
-    styleType = 1;
-  } else if(styleType == 1){
-    markerCluster.setStyles(defaultStyles);
-    styleType = 0;
-  }
-}
-
-/**
- * 取消点聚合
- */
-function withoutCluster(){
-  if(markerCluster)
-    markerCluster.clearMarkers();
-
-  var MAX = 100;
-  var pt = null;
-  var i=0;
-  for(;i < MAX; i++){
-    pt = new BMap.Point(Math.random() * 40 + 85, Math.random() * 30 + 21);
-    var marker = new BMap.Marker(pt);
-    map.addOverlay(marker);
-  }
-}
-

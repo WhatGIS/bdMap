@@ -58,6 +58,7 @@ function getInfoContent(){
   };
   var infoWindow = new BMapGL.InfoWindow('地址：北京市东城区王府井大街88号乐天银泰百货八层', opts);
   map.openInfoWindow(infoWindow, point);
+
   function getInfoContent() {
     alert(infoWindow.getContent());
   }

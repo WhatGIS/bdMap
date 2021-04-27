@@ -1,21 +1,26 @@
 
-/**
- * 地图定位
- */
-function mapLocation(){
+function theLocation(){
+  map.centerAndZoom('合肥市',11);
+}
 
-  geoLocation();
-  cityLocation();
-  sdkLocation();
+function panToMap(){
+  map.removeEventListener('click');
+  map.addEventListener('click',function (e) {
+    let pt =new BMapGL.Point(e.latlng.lng,e.latlng.lat);
+    map.panTo(pt);
+  });
+};
+
+
 
   /**
    * 浏览器定位
    */
   function geoLocation() {
-    var geoLocation = new BMap.Geolocation();
+    var geoLocation = new BMapGL.Geolocation();
     geoLocation.getCurrentPosition(function (r) {
       if(this.getStatus() == BMAP_STATUS_SUCCESS){
-        var mk = new BMap.Marker(r.point);
+        var mk = new BMapGL.Marker(r.point);
         map.addOverlay(mk);
         map.panTo(r.point);
         alert('您的位置:' + r.point.lng + "," + r.point.lat);
@@ -35,7 +40,7 @@ function mapLocation(){
       map.setCenter(cityName);
       alert("当前城市"+cityName);
     }
-    var myCity = new BMap.LocalCity();
+    var myCity = new BMapGL.LocalCity();
     myCity.get(myFun);
   }
 
@@ -43,11 +48,11 @@ function mapLocation(){
    * SDK辅助定位
    */
   function sdkLocation() {
-    var geoLocation = new BMap.Geolocation();
+    var geoLocation = new BMapGL.Geolocation();
     geoLocation.enableSDKLocation();
     geoLocation.getCurrentPosition(function (r) {
       if(this.getStatus() == BMAP_STATUS_SUCCESS){
-        var mk = new BMap.Marker(r.point);
+        var mk = new BMapGL.Marker(r.point);
         map.addOverlay(mk);
         //map.panTo(r.point);
         console.log('您的新位置:' + r.point.lng + "," + r.point.lat);
@@ -57,4 +62,4 @@ function mapLocation(){
       }
     });
   }
-}
+

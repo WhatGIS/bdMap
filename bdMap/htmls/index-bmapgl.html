@@ -112,9 +112,9 @@
       width: auto;
       min-width: 22rem;
       padding: .75rem 1.25rem;
-      margin-left: 5rem;
+      right: 5rem;
       position: fixed;
-      top: 0.3rem;
+      top: 2rem;
       background-color: rgba(265, 265, 265, 0.9);
       border-radius: .25rem;
       font-size: 14px;
@@ -162,6 +162,11 @@
   <link href="//mapopen.bj.bcebos.com/github/BMapGLLib/RichMarker/src/RichMarker.min.js" rel="stylesheet">
   <script src="//mapopen.bj.bcebos.com/github/BMapGLLib/RichMarker/src/RichMarker.min.js"></script>
 
+  <script src="//mapv.baidu.com/build/mapv.min.js"></script>
+  <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.119/dist/mapvgl.min.js"></script>
+
+  <script type="text/javascript" src="//api.map.baidu.com/library/TrackAnimation/src/TrackAnimation_min.js"></script>
+  <script type="text/javascript" src="//api.map.baidu.com/library/LuShu/gl/src/LuShu_min.js"></script>
 
   <!--  <script type="text/javascript" src="../js/BMapGLLib/RichMarkerGL.js"></script>-->
   <script type="text/javascript" src="../js/MapLib/CoordTransferd.js"></script>
@@ -180,22 +185,24 @@
   <script type="text/javascript" src="../js/BMapGLLib/library/09richMarker.js"></script>
   <script type="text/javascript" src="../js/BMapGLLib/library/10mapEvents.js"></script>
   <script type="text/javascript" src="../js/BMapGLLib/library/11ContextMenu.js"></script>
-
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/07cluster.js"></script>-->
-<!--  &lt;!&ndash;  <script type="text/javascript" src="../js/BMapLib/library/10poiSearch.js"></script> 单独放在一个js文件中，不能正常显示&ndash;&gt;-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/11addressDecode.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/12routeSearch.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/13geoLocation.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/14panorama.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/15autoComplete.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/16vectorsymbol.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/17heatmap.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/18bigdata.js"></script>-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/19trace.js"></script>.-->
-<!--  <script type="text/javascript" src="../js/BMapGLLib/library/20lushu.js"></script>-->
+  <script type="text/javascript" src="../js/BMapGLLib/library/12cluster.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/13routeSearch.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/14geoLocation.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/15addressDecode.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/16autoComplete.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/17animation.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/18track.js"></script>
+  <script type="text/javascript" src="../js/BMapGLLib/library/19lushu.js"></script>
 <!--  此Key为测试用，可能随时会被删除，请替换为自己的key。-->
 </head>
 <body>
+
+<div id="r-result">请输入:<input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
+<div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto;"></div>
+
+<div id="results" style="width:400px;height: 500px;position: absolute;margin-top: 230px;margin-left:5px;z-index: 100; background-color: #4FA5FC;display: block;" >
+
+</div>
 
 <div class = "info">
   <div>改变地图级别:</div>
@@ -244,7 +251,7 @@
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="3D棱柱" onclick="addPrism()">
 </div>
 
-<div style="width: 200px;height: 100px;position: absolute;margin-top: 830px;margin-left:105px;z-index: 100;">
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 830px;margin-left:205px;z-index: 100;">
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="地面图片层" onclick="addGroundOverlay()">
   <br/>
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="地面Canvas层" onclick="addCanvasLayer()">
@@ -254,7 +261,7 @@
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="交通路况" onclick="addTrafficLayer()">
 </div>
 
-<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:205px;z-index: 100;">
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:305px;z-index: 100;">
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="信息窗口" onclick="addSimpleInfo()">
   <br/>
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="Html信息" onclick="addContentInfo()">
@@ -266,7 +273,7 @@
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="RichMarker窗口" onclick="addRichMarker()">
 </div>
 
-<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:305px;z-index: 100;">
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:405px;z-index: 100;">
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="加载完成事件" onclick="addMapLoaded()">
   <br/>
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="添加点击事件" onclick="addMapClick()">
@@ -278,10 +285,135 @@
   <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="删除右键" onclick="removeMapContextMenu()">
 </div>
 
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:505px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="聚合" onclick="addClusters()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="地址解析" onclick="geoCode()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="地址逆解析" onclick="geoDecode()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:605px;z-index: 100;">
+  <select id="routeSelect" style="width: 100px;height: 30px;padding-left: 5px; background-color: steelblue;color: antiquewhite;"  onChange="changeRouteType()">
+    <option value="none">路线类型</option>
+    <option value="drive">驾车路线</option>
+    <option value="bus">公交路线</option>
+    <option value="walk">步行路线</option>
+<!--    <option value="ride">骑行路线</option>-->
+  </select>
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="关键字查询" onclick="poiSearch()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="附件查询" onclick="nearbySearch()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="范围查询" onclick="inBoundSearch()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="自动完成" onclick="addAutocomplete()">
+
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:705px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="动画" onclick="addMapAnimations()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="flyTo" onclick="setMapFly()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="panTo" onclick="setMapPan()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="轨迹" onclick="addTracker()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="路书" onclick="addLushu()">
+</div>
+
+<div style="width: 200px;height: 100px;position: absolute;margin-top: 800px;margin-left:805px;z-index: 100;">
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="城市名定位" onclick="theLocation()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="经纬度定位" onclick="panToMap()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="浏览器定位" onclick="geoLocation()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="IP定位" onclick="cityLocation()">
+  <br/>
+  <input style="width: 80px;height: 30px;padding-left: 10px; background-color: steelblue; color: antiquewhite;" type="button" value="辅助定位" onclick="sdkLocation()">
+</div>
+
+
 <div id="allmap"></div>
 
 </body>
 </html>
 <script type="text/javascript">
   setMap();
+
+  /**
+   * 关键字查询必需和html页面在一起，否则页面的图标无法出现。
+   **/
+
+  let local = null; //公共变量 查询对象
+  let rendOpts = {
+    map:map,
+    autoViewport:true,
+    panel:"results",
+    selectFirstResult:false
+  };
+
+  var searchOpts = {
+    renderOptions: rendOpts,
+    pageCapacity:6,
+    onSearchComplete:function (results) {
+      if(local.getStatus() == BMAP_STATUS_SUCCESS){
+        var s = [];
+        for(var i=0;i<results.getCurrentNumPois();i++){
+          s.push(results.getPoi(i).title + "," + results.getPoi(i).address);
+        }
+        console.log(s.join("<br>"));
+      }
+    }
+  };
+
+  function clearSearch(){
+    if(local){
+      local.clearResults();
+    }
+  };
+
+  /**
+   * POI搜索
+   */
+  function poiSearch(){
+    clearSearch();
+    local = new BMapGL.LocalSearch(map,searchOpts);
+    local.search("公园");
+  };
+
+  /**
+   * 附近搜索
+   */
+  function nearbySearch(){
+    clearSearch();
+    local = new BMapGL.LocalSearch(map,searchOpts);
+    local.searchNearby("酒店","北京大学");
+  };
+
+  /**
+   * 范围查询
+   */
+  function inBoundSearch(){
+    clearSearch();
+    map.centerAndZoom(new BMapGL.Point(116.274625,39.961627), 13);
+
+    local = new BMapGL.LocalSearch(map,searchOpts);
+    var pStart = new BMapGL.Point(116.274625,39.961627);
+    var pEnd = new BMapGL.Point(116.367474,39.988609);
+    var bs = new BMapGL.Bounds(pStart,pEnd);   //自己规定范围
+
+    local.searchInBounds("银行",bs);
+    var polygon = new BMapGL.Polygon([
+      new BMapGL.Point(pStart.lng,pStart.lat),
+      new BMapGL.Point(pEnd.lng,pStart.lat),
+      new BMapGL.Point(pEnd.lng,pEnd.lat),
+      new BMapGL.Point(pStart.lng,pEnd.lat)
+    ], {strokeColor:"blue", strokeWeight:6, strokeOpacity:0.5});
+    map.addOverlay(polygon);
+  };
+
 </script>

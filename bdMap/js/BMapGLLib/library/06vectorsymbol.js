@@ -77,7 +77,9 @@ function editPolygon() {
   openEdit();
 }
 
-
+/**
+ * 贝塞尔曲线
+ */
 function addBezierCurve(){
   var point = new BMapGL.Point(113.504, 39.925);
   map.centerAndZoom(point, 8);
@@ -107,6 +109,9 @@ function addBezierCurve(){
   map.addOverlay(new BMapGL.Marker(cp3));
 }
 
+/**
+ * 棱柱
+ */
 function addPrism(){
   var point = new BMapGL.Point(116.404, 39.925);
   map.centerAndZoom(point, 10);
