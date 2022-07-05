@@ -1,7 +1,12 @@
+ **# 请在各引用百度JS处更换为自己申请的百度 Key. 否则不能正常使用。**
+
+ 我的key已经被百度提示超过限额，请大家更换自己的key
+
 **# 百度地图APIDemo**
 
 本人使用百度地图API进行开发时的总结，仅供参考。
 
+  <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=baidukey"></script>
 
 
 1. [GIS项目开发流程](https://www.cnblogs.com/googlegis/p/14640897.html)

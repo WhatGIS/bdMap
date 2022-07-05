@@ -84,6 +84,7 @@
   function addInfoBox(){
     var poi = new BMapGL.Point(116.307852, 40.057031);
     map.centerAndZoom(poi, 19);
+    
     var html = [
       "<div class='infoBoxContent'><div class='title'><strong>中海雅园</strong><span class='price'>均价43000</span></div>",
       "<div class='list'><ul><li><div class='left'><img src='../img/gl/wucaicheng.jpg'/></div><div class='left'><a target='_blank' href='//map.baidu.com'>中海雅园南北通透四居室</a><p>4室2厅，205.00平米，3层</p></div><div class='rmb'>760万</div></li>",
@@ -93,6 +94,7 @@
       "<li class='last'><div class='left'><img src='../img/gl/wucaicheng.jpg'/></div><div class='left'><a target='_blank' href='//map.baidu.com'>富力城豪，身份人士的象征</a><p>4室2厅，213.90平米，25层</p></div><div class='rmb'>700万</div></li>",
       "</ul></div>", "</div>"
     ];
+
     var infoBox = new BMapGLLib.InfoBox(map, html.join(""), {
       boxStyle: {
         background: "#6cb2fa",
